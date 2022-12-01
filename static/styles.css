@@ -1,0 +1,33 @@
+* {
+   font-family: 'Times New Roman';
+   color: darkorange;
+}
+
+
+html {
+   background-image:url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRnleDKc1AdchNjNerbO933T7L6Al3dI61Og&usqp=CAU");
+  background-size: cover;
+  background-position: center;
+}
+
+p, li, a {
+   font-size: 18px;
+   width: 1600px; 
+}
+
+
+h4 {
+    font-size: 24px;
+
+}
+
+.section {
+	display: grid;
+	grid-template-rows: 50px 50px;
+	text-align: center;
+}
+
+.intro {
+	height : 900px;
+
+}

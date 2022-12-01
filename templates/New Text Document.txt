@@ -1,0 +1,11 @@
+SELECT * FROM table
+WHERE col2 < 100
+OR WHERE col2 = 10
+ORDER BY col_name DESC, col2 ASC
+
+using multiple columns with ORDER BY goes in that order
+
+join queries with AND or OR
+
+SELECT column1, column2 FROM table;
+SELECT column1, 'str' FROM table;  - yields another column of values 'str'

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>My Website</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dataStyles.css') }}">
+  </head>
+
+
+<header>
+    <h1> Graphs & Charts </h1>
+</header>
+
+<body>
+    <div class="firstgraph">
+        <h3> Graph Type 1 - Univariate Data</h3>
+        <p> This type of graph is useful for determining traits of a single variable. In the example, the Energy Problems column is used. The graph takes the already distilled data and represents it as a bar chart, showing the breakdowns of each problem. THis kind of graph is especially useful when trying to determine what specific problem is the most apparent throughout EM serviced apartments.</p>
+        <a href= '/data_graph/1' target="_blank"> Click Here To View The Graph</a>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+    <div class="secondgraph">
+        <h3> Graph Type 2 - Multivariate Data</h3>
+        <p>The most useful graph for analyzing the data as a whole is multivariate graphs such as double-columned bar graphs, scatter plots & matrices, heatmaps, and even violin plots. In the example, the thermostat temperatures for winter and summer are compared to each other with respect to the number of members in the household.</p>
+        <p>From the graph, we can see that there is a loose correlation between household size and thermostat temperatures. Additionally, the thermostat temperatures in the summer seem to be directly related to the winter temperatures.</p>
+        <a href= '/data_graph/2' target="_blank"> Click Here To View The Graph</a>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+    <div class="thirdgraph">
+        <h3> Graph Type 3 - Overall Trends</h3>
+        <p> Our main goal is to eventually present our findings, and show some kind of impact. A line graph, or even multivariate scatter matrix, can suffice. By combining various variables in multiple categories, we can visually depict trends in an easy manner.</p>
+        <p> Some notes - Unlike the other two graphs, since there isn't any data in the sheets, this graphs has been artificially created solely for the purpose of demonstration. Hovering over a line will show the stats for the closest point. Clicking on the lines in the legend will toggle between hiding and showing them.</p>
+        <p> Energy Awareness is a metric that can be determined based on the responses on the survey, and follow-ups ( type of bulbs, etc).</p>
+        <p> Some easy trends are that we clearly increased residents' energy awareness. Also, volunteers were less likely to come during the winter months (purely imaginary-NOT REAL).</p>
+        <a href= '/data_graph/3' target="_blank"> Click Here To View The Graph</a>
+    </div>
+
+
+</body>

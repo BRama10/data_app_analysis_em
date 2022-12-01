@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    
+    <title>My Website</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dataStyles.css') }}">
+  </head>
+<header>
+
+<h1> RESULTS </h1>
+
+</header>  
+<body>
+
+{% if tbl_name == 'contact' %}
+<table border="1">
+  <thead>
+    <tr>
+      <th scope="col">index</th>
+      {% for z in _name_contact %}
+        <th scope="col">{{ z }}</th>
+      {% endfor %}
+    </tr>
+
+  </thead>
+  <tbody>
+  {% for row in test %}
+  <tr> 
+    {% for r in row %}
+    <td> 
+      
+      {{ r }} 
+    
+    </td>
+    {% endfor %}
+  
+  </tr>
+   
+  {% endfor %}
+</tbody>
+</table>  
+{% else %}
+<table border="1">
+  <thead>
+    <tr>
+      <th scope="col">index</th>
+      {% for z in _name_data %}
+        <th scope="col">{{ z }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  
+  <tbody>
+  {% for row in test %}
+  <tr> 
+    {% for r in row %}
+    <td> 
+      
+      {{ r }} 
+    
+    </td>
+    {% endfor %}
+  
+  </tr>
+   
+  {% endfor %}
+</tbody>
+</table>  
+{% endif %}
+<br>
+<br>
+<br>
+<br>
+<a href='/database/'> Create Another Search </a>
+</body>
+</html>

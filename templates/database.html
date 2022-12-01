@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="{{url_for('static', filename='jquery-3.6.1.min.js')}}"> </script>
+	<script type = "text/javascript" src="{{url_for('static', filename='conditional-field.min.js')}}"></script>
+	<script type = "text/javascript" src="{{url_for('static', filename='dataScript.js')}}"></script>
+    <title>My Website</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dataStyles.css') }}">
+  </head>
+<header>
+
+<h1> Database Editor </h1>
+
+</header>  
+<body>
+	<form action ="/database_result" method ="POST">
+			{% set ns = namespace(count=false) %}
+			{% set ns.count = 1  %}
+			<p> Choose Desired Table </p>
+			<br>
+			<label><input type='radio' class = 'choosetable' name = 'choosetable' id = 'choosetable_contacts' value = 'contact' >Contacts </label>
+			<label><input type='radio' class = 'choosetable' name = 'choosetable' id = 'choosetable_data' value = 'data' >Data </label>
+			<br>
+
+			<label class = 'humancheck_contact'><input type='checkbox' class = 'humancheck_contact' name = 'blank' value = 'dummy1' > Check For Human Verification </label>
+			<label class = 'humancheck_data'><input type='checkbox' class = 'humancheck_data' name = 'blank' value = 'dummy2' > Check For Human Verification </label>
+
+			<br>
+			<p> Choose Desired Filters </p>
+			<br>
+			<div class="conditional testclass">
+				{% for id, names in contact_col %}
+				
+
+				<label><input type="checkbox" class='contact_{{id}}' name='contact_{{id}}' value="on">{{names}}</label>
+				
+				<div class="contact_andor_{{id}}">
+					<label><input type='radio' class = 'and_or' name = 'contact_and_or_{{id}}' id = 'or_{{id}}' value = 'or' >OR</label>
+					<label><input type='radio' class = 'and_or' name = 'contact_and_or_{{id}}' id = 'and_{{id}}' value = 'and' >AND</label>
+				</div>
+
+				
+
+
+					
+				<div class='value_contact_{{id}}'>
+					<input type="text" name="value_contact_{{id}}" placeholder="Enter Value">
+				
+				</div>
+				<br>
+				{% endfor %}
+				{% for id, names in data_col %}
+
+				<label><input type="checkbox" class='data_{{id}}' name='data_{{id}}' value="on">{{names}}</label>
+
+
+				<div class = "data_all_{{id}}">
+					<div class="data_andor_{{id}}">
+						<label><input type='radio' class = 'and_or_{{id}}' name = 'data_and_or_{{id}}' id = 'or_{{id}}' value = 'or' >OR</label>
+						<label><input type='radio' class = 'and_or_{{id}}' name = 'data_and_or_{{id}}' id = 'and_{{id}}' value = 'and' >AND</label>
+					</div>
+	
+					{% if id in dtypes_col %}
+					<div class='bound_decider_{{ns.count}}'>
+						<span> Bound Decider: </span>
+						<label><input type='radio' class = 'bound_decider_button_{{ns.count}}' name = 'floatdecider_{{id}}' id = 'one' value = 'single' >Single-Bounded Range</label>
+						<label><input type='radio' class = 'bound_decider_button_{{ns.count}}' name = 'floatdecider_{{id}}' id = 'two' value = 'double' >Double-Bounded Range</label>
+					</div>
+	
+	
+					<div class='num_range_single_{{ns.count}}'>
+						<span> Choose Operation: </span>
+						<select id='single_float_id_{{ns.count}}' name='single_float_name_{{id}}'>
+							<option value = 'NONE'> Choose An Option</option>
+							<option value = 'gt'> &gt;</option>
+							<option value = 'lt'> &lt; </option>
+							<option value = 'leq'> &gE; </option>
+							<option value = 'geq'> &lE; </option>
+							<option value = 'eq'> &equals; </option>
+							<option value = 'neq'> &ne;</option>
+
+						</select>
+	
+					</div>
+	
+					<div class='num_range_double_{{ns.count}}'>
+						<p> Choose Operation</p>
+						<select id='double_float_id_{{ns.count}}' name='double_float_name_{{id}}'>
+							<option value = 'NONE'> Choose An Option</option>
+							<option value = 'between'> Between </option>
+							<option value = 'greater_lesser'> Greater Than One and Less Than Another </option>
+						</select>
+	
+					</div>
+					{% set ns.count=ns.count+1 %}
+
+					{% endif %}
+
+
+				</div>
+
+				
+
+
+					
+				<div class='value_data_{{id}}'>
+					<input type="text" name="value_data_{{id}}" placeholder="Enter Value">
+
+				</div>
+
+				<br>
+				{% endfor %}
+
+				<br>
+				<div class="conditional_submit">
+					<input type="submit" value="Send"> 
+				</div>
+			</div>
+			
+	</form>
+
+</body>
+</html>
