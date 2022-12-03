@@ -6,19 +6,29 @@ import numpy as np
 
 df = None
 
+#Function that cleans all data (called from main.py)
 def setup():
   global df
+  
+  #read csv file, factor out the English Only section
   df = pd.read_csv('/tmp/datafile.csv')
   df = df.iloc[:, 0 : 20]
-
+  
+  #delete the now-useless language column
   df.drop(columns=['What language do you speak?'], inplace=True)
+  
+  #create new DataFrame for contacts, delete said DataFrame from data DataFrame
   contact = df.loc[:, 'Full Name (First and Last)' : 'Email']
   df.drop(columns=['Full Name (First and Last)', 'Unit Number', 'Phone Number', 'Email'], inplace=True)
 
 
+  #use built-in functions to clean, filter, and factor certain columns
   stat1 = clean_problems()
   stat2 = clean_occur()
   stat3 = clean_light()
+  
+  #use abstract functions to clean, filter, factor certain columns
+  #assign mapping values to dictionaries for use in other files if needed
   convert_dict_leavelight, stat4 = redundant_clean_rest('When leaving a room, how often do you turn off the lights?', 7)
   convert_dict_leavetv, stat5 = redundant_clean_rest('When leaving a room, how often do you turn off televisions?', 8)
   convert_dict_leavekitchen, stat6 = redundant_clean_rest('How often do you run the kitchen exhaust fan when cooking on the stove?', 9)
@@ -32,13 +42,15 @@ def setup():
 
 
   #verified
+  #check if any conversions failed | if any failed, then crash the program (in full version will build Exception handler in main.py in order to gracefully stop the program)
   if(not any([stat1,stat2,stat3,stat4,stat5,stat6,stat7,stat8,stat9,stat10,stat11])):
     raise Exception
-
+  
+  #demo specific | changes the first value to string since null values cloud comuter's judgement of datatypes
   for x in range(len(df.iloc[:,1])):
     df.iat[x,1] = str(df.iat[x,1])
 
-
+  #write data to csv & pickle files for use in later parts of program
   df.to_csv('/tmp/cleaned_data.csv', encoding='utf-8')
   contact.to_csv('/tmp/contact_data.csv', encoding='utf-8')
   df.to_pickle('/tmp/cleaned_data.pkl')
