@@ -6,9 +6,9 @@ import numpy as np
 
 df = None
 
-def setup(var):
+def setup():
   global df
-  df = pd.read_csv(var)
+  df = pd.read_csv('/tmp/datafile.csv')
   df = df.iloc[:, 0 : 20]
 
   df.drop(columns=['What language do you speak?'], inplace=True)
@@ -39,9 +39,9 @@ def setup(var):
     df.iat[x,1] = str(df.iat[x,1])
 
 
-  df.to_csv('cleaned_data.csv', encoding='utf-8')
-  contact.to_csv('contact_data.csv', encoding='utf-8')
-  df.to_pickle('cleaned_data.pkl')
+  df.to_csv('/tmp/cleaned_data.csv', encoding='utf-8')
+  contact.to_csv('/tmp/contact_data.csv', encoding='utf-8')
+  df.to_pickle('/tmp/cleaned_data.pkl')
 
 
 

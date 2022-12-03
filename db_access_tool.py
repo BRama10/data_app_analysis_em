@@ -7,12 +7,12 @@ _names_contact,_names_data,_map_contact, _copy_contact, _raw_contact,_map_data, 
 
 def setup_sql_dict():
     global _names_contact,_names_data,_map_contact, _copy_contact, _raw_contact,_map_data, _copy_data, _raw_data, _info_data,  _info_contact, _types
-    c = sqlite3.connect('em_volunteer_survey.db')
+    c = sqlite3.connect('/tmp/em_volunteer_survey.db')
     cur = c.cursor()
     cur.execute("SELECT * FROM contact")
-    _names_contact = [description[0] for description in cur.description][1:]
+    _names_contact = [description[0] for description in cur.description][2:]
     cur.execute("SELECT * FROM data")
-    _names_data = [description[0] for description in cur.description][1:]
+    _names_data = [description[0] for description in cur.description][2:]
     
 
     _map_contact, _copy_contact, _raw_contact = enumerate(_names_contact), enumerate(_names_contact), dict(enumerate(_names_contact))

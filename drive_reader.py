@@ -10,6 +10,12 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+
+
+
+
+
+
   
 class DriveAPI:
     global SCOPES
@@ -17,45 +23,12 @@ class DriveAPI:
       
     # Define the scopes
     SCOPES = ['https://www.googleapis.com/auth/drive']
+
+    
   
-    def __init__(self):
+    def __init__(self, creds):
         self.file_list = []
-        # Variable self.creds will
-        # store the user access token.
-        # If no valid token found
-        # we will create one.
-        self.creds = None
-  
-        # The file token.pickle stores the
-        # user's access and refresh tokens. It is
-        # created automatically when the authorization
-        # flow completes for the first time.
-  
-        # Check if file token.pickle exists
-        if os.path.exists('token.pickle'):
-  
-            # Read the token from the file and
-            # store it in the variable self.creds
-            with open('token.pickle', 'rb') as token:
-                self.creds = pickle.load(token)
-  
-        # If no valid credentials are available,
-        # request the user to log in.
-        if not self.creds or not self.creds.valid:
-  
-            # If token is expired, it will be refreshed,
-            # else, we will request a new one.
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', SCOPES)
-                self.creds = flow.run_local_server(port=0)
-  
-            # Save the access token in token.pickle
-            # file for future usage
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(self.creds, token)
+        self.creds = creds
   
         # Connect to the API service
         self.service = build('drive', 'v3', credentials=self.creds)
@@ -76,23 +49,19 @@ class DriveAPI:
         request = self.service.files().get_media(fileId=file_id)
         #request = self.service.files().export_media(fileId=file_id, mimeType='application/pdf')
         fh = io.BytesIO()
-          
         # Initialise a downloader object to download the file
         downloader = MediaIoBaseDownload(fh, request, chunksize=204800)
         done = False
-  
         try:
             # Download the data in chunks
             while not done:
                 status, done = downloader.next_chunk()
   
             fh.seek(0)
-              
             # Write the received data to the file
             with open(file_name, 'wb') as f:
                 shutil.copyfileobj(fh, f)
   
-            print("File Downloaded")
             # Return True if file Downloaded successfully
             return True
         except:
@@ -102,29 +71,32 @@ class DriveAPI:
     def FileDownloadWorkspace(self, file_id, file_name):
 
         request = self.service.files().export_media(fileId=file_id, mimeType='text/csv')
+        print("Stage 1 Done")
         fh = io.BytesIO()
-          
+        print("Stage 2 Done")
         # Initialise a downloader object to download the file
         downloader = MediaIoBaseDownload(fh, request, chunksize=204800)
         done = False
-  
+        print("Stage 3 Done")
         try:
             # Download the data in chunks
             while not done:
                 status, done = downloader.next_chunk()
-  
+            print("Stage 4 Done")
             fh.seek(0)
-              
+            #fn = os.path.dirname(__file__) + "nf.file"
             # Write the received data to the file
-            with open(file_name, 'wb') as f:
+            print("Stage 5 Done")
+            with open('/tmp/datafile.file', 'wb') as f:
                 shutil.copyfileobj(fh, f)
   
             print("File Downloaded")
             # Return True if file Downloaded successfully
             return True
-        except:
-            print("File Unable to be Downloaded")
-            return False
+        except BaseException as e:
+            return 'Didn\'t Work'
+  
+            print("File Downloaded")
         
     
 
@@ -166,8 +138,8 @@ class Scraper:
         else:
             print("No Value Found")
 
-def callbackFunction(val):
-    obj = DriveAPI()
+def callbackFunction(val, c):
+    obj = DriveAPI(c)
     scraper = Scraper()
   
     try:
@@ -178,7 +150,7 @@ def callbackFunction(val):
         check1 = scraper.findByName(k)
  
         check2 = scraper.getValue()
-
+        print(check1, check2)
         if(check1 == False or check2 == False):
             raise NameError
         obj.FileDownloadNonWorkspace(scraper.getValue(clean = True)[0], scraper.getValue(clean = True)[1])

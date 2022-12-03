@@ -1,15 +1,16 @@
-import seaborn as sns
 import pandas as pd
 import numpy as np
 from bokeh.layouts import column
 from bokeh.io import curdoc, show
 from bokeh.models import ColumnDataSource, Grid, LinearAxis, Plot, VBar, RangeTool, HoverTool
-from bokeh.plotting import figure, show
+from bokeh.plotting import figure, show, output_file
 from bokeh.palettes import Spectral6, magma,Spectral10
 from DataFiltration import convert_dict_problems, convert_dict_occur
 from scipy.stats import linregress
+from bokeh.embed import components
 from bokeh.transform import factor_cmap, factor_mark
 from datetime import datetime
+from bokeh.resources import INLINE
 
 
 inv_dict_problems = {v: k for k, v in convert_dict_problems.items()}
@@ -24,7 +25,7 @@ def to_1D(series):
 
 
 def create_bar_problems():
-    df = pd.read_pickle('cleaned_data.pkl')
+    df = pd.read_pickle('/tmp/cleaned_data.pkl')
     
     for x in range(len(df.iloc[:,2])):
       df.iat[x,2] = list(str(df.iat[x,2]))
@@ -60,11 +61,12 @@ def create_bar_problems():
     p.xaxis.axis_label = "Problem Name"
     p.yaxis.axis_label = "Number of Households"
 
-    show(p)
-    return "ACTIVE"
+    script, div = components(p)
+
+    return script, div
 
 def create_scatter_therm_household():
-    df = pd.read_pickle('cleaned_data.pkl')
+    df = pd.read_pickle('/tmp/cleaned_data.pkl')
     
     x = df['If yes, what is the thermostat temperature in the winter?']
     y = df['If yes, what is the thermostat temperature in the summer?']
@@ -89,8 +91,8 @@ def create_scatter_therm_household():
     plot.xaxis.axis_label = "Winter Temp (F)"
     plot.yaxis.axis_label = "Summer Temp (F)"
 
-    show(plot)
-    return "ACTIVE"
+    script, div = components(plot)
+    return script, div
 
 
 #Purely artifical graph
@@ -168,8 +170,8 @@ def create_line_plot():
     p.xaxis.axis_label = "Date (Timeseries)"
     p.yaxis.axis_label = "Value (Units depending on metric)"
         
-    show(p)
-    return "ACTIVE"
+    script, div = components(p)
+    return script, div
 
 
 #Some more failed attempts at trying to get the formatting right :/

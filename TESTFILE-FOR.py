@@ -1,9 +1,17 @@
-import pandas as pd
+import shutil
+import os
+
+try:
+    os.mkdir('C:\\Users\\balaj\\html_transfer\\templates\\tesdir\\static')
+except:
+    pass
+try:
+    os.mkdir('C:\\Users\\balaj\\html_transfer\\templates\\tesdir\\static')
+except:
+    pass
 
 
 
-r_file = pd.read_csv('Untitled spreadsheet')
-r_file.to_csv('test1.csv', index=None)
 
 
 
