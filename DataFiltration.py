@@ -57,7 +57,7 @@ def setup():
 
 
 
-
+#below dicts are manual mapping keys
 convert_dict_problems = {
                           'Dripping faucets, showers, or pipes': '1',
                          'Drafty/Windy/Cold Rooms': '2',
@@ -98,6 +98,7 @@ convert_dict = {'What Energy-Related Problems Do You Face (Select All Applicable
                 }
 
 #Verified
+#below are functions that use the manual dicts to convert data
 def clean_problems():
   keys = list(convert_dict_problems.keys())
   vals = list(convert_dict_problems.values())
@@ -187,22 +188,7 @@ def clean_watertap():
     df.iat[x, 13] = int(val)
   return True
 
-#verified
-def redundant_clean_rest(name, pos):
-  keys = list(df[name].unique())
-  keys.remove(np.nan)
-  vals = [x+1 for x in range(0, len(keys))]
-  thisDict = dict(map(lambda i,j : (i,j) , keys,vals))
-  for x in range(0, df.shape[0]):
-    val=None
-    curr = str(df.iat[x, pos])
-    for y in range(0, len(keys)):
-      if(keys[y] in curr):
-        val = vals[y]
-    if(val == None):
-      val = -1
-    df.iat[x, pos] = val
-  return thisDict, True
+
 
 #verified
 def clean_minshower():
@@ -225,32 +211,24 @@ def clean_minshower():
   return True
 
 #verified
-def main_funct():
-  stat1 = clean_problems()
-  stat2 = clean_occur()
-  stat3 = clean_light()
-  convert_dict_leavelight, stat4 = redundant_clean_rest('When leaving a room, how often do you turn off the lights?', 7)
-  convert_dict_leavetv, stat5 = redundant_clean_rest('When leaving a room, how often do you turn off televisions?', 8)
-  convert_dict_leavekitchen, stat6 = redundant_clean_rest('How often do you run the kitchen exhaust fan when cooking on the stove?', 9)
-  convert_dict_leavedish, stat7 = redundant_clean_rest('How often do you run the dishwasher?', 10)
-  convert_dict_leaveclothes, stat8 = redundant_clean_rest('How often do you run the clothes washer and dryer?', 11)
-  convert_dict_heatset, stat9 = redundant_clean_rest('What heat setting do you wash your clothes on?', 12)
-  stat10 = clean_watertap()
-  stat11 = clean_minshower()
+#this function is an abstract function that creates its own mapping and conversion factors, returns the dict for later use
+def redundant_clean_rest(name, pos):
+  keys = list(df[name].unique())
+  keys.remove(np.nan)
+  vals = [x+1 for x in range(0, len(keys))]
+  thisDict = dict(map(lambda i,j : (i,j) , keys,vals))
+  for x in range(0, df.shape[0]):
+    val=None
+    curr = str(df.iat[x, pos])
+    for y in range(0, len(keys)):
+      if(keys[y] in curr):
+        val = vals[y]
+    if(val == None):
+      val = -1
+    df.iat[x, pos] = val
+  return thisDict, True
 
 
 
-
-  #verified
-  if(not any([stat1,stat2,stat3,stat4,stat5,stat6,stat7,stat8,stat9,stat10,stat11])):
-    raise Exception
-
-  for x in range(len(df.iloc[:,1])):
-    df.iat[x,1] = str(df.iat[x,1])
-
-
-  df.to_csv('cleaned_data.csv', encoding='utf-8')
-  contact.to_csv('contact_data.csv', encoding='utf-8')
-  df.to_pickle('cleaned_data.pkl')
 
 
