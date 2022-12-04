@@ -28,7 +28,8 @@ API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
 print(os.listdir('/tmp/'))
-      
+
+#create in-memory folders for templates and static files
 try:
     os.mkdir('/tmp/templates')
 except:
@@ -38,11 +39,13 @@ try:
 except:
     pass
 
+
 source_folder_templates = '/srv/templates/'
 source_folder_static = '/srv/static/'
 destination_folder_templates = '/tmp/templates/'
 destination_folder_static = '/tmp/static/'
 
+#copy all static and template files into the new location
 for file_name in os.listdir(source_folder_templates):
     source = source_folder_templates + file_name
     dest = destination_folder_templates + file_name
@@ -60,12 +63,13 @@ for file_name in os.listdir(source_folder_static):
         print('Copied: ', file_name)
 
 
-
+#start app with new redirect locations
 app = Flask(__name__, template_folder = '/tmp/templates/', static_folder = '/tmp/static/')
+
 
 app.secret_key = 'REPLACE ME - this value is here as a placeholder.'
 
-
+#converts the credentials from JSON to usable form
 def credentials_to_dict(credentials):
   return {'token': credentials.token,
           'refresh_token': credentials.refresh_token,
@@ -75,23 +79,15 @@ def credentials_to_dict(credentials):
           'scopes': credentials.scopes}
 
 
-@app.route('/i', methods=['GET', 'POST'])
-def starter_page():
-    credentials = google.oauth2.credentials.Credentials(
-      **flask.session['credentials'])
-    
-    if request.method == 'POST':
-        val = request.form.get('file_name')
-        callbackFunction(val, credentials)
-
-        r_file = pd.read_csv("/tmp/datafile.file")
-        r_file.to_csv("/tmp/datafile.csv", index=None)
-
-        return render_template('drive.html', var= True)
-    return render_template('drive.html', var=False)
+#first page you enter, checks if user is logged in -- if not, then starts verification process
+@app.route('/', methods=['GET', 'POST'])    
+def start():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    return redirect(url_for('starter_page'))
 
 
-
+#authorizes user through OAuth2 
 @app.route('/authorize')
 def authorize():
   # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
@@ -116,7 +112,7 @@ def authorize():
 
   return flask.redirect(authorization_url)
 
-
+#verifies specific access to my application (this is after the general google login, and it contains the checkboxes)
 @app.route('/oauth2callback')
 def oauth2callback():
   # Specify the state when creating the flow in the callback so that it can
@@ -139,7 +135,7 @@ def oauth2callback():
 
   return flask.redirect(flask.url_for('starter_page'))
 
-
+#isn't useful for the user but I can use if needed to revoke someone's access from the app
 @app.route('/revoke')
 def revoke():
   if 'credentials' not in flask.session:
@@ -159,7 +155,7 @@ def revoke():
   else:
     return('An error occurred.' + print_index_table())
 
-
+#reboots the whole app's access tools, failsafe if unable to revoke individual's access
 @app.route('/clear')
 def clear_credentials():
   if 'credentials' in flask.session:
@@ -167,16 +163,26 @@ def clear_credentials():
   return ('Credentials have been cleared.<br><br>' +
           print_index_table())
 
+#the first page (where you see the small box)
+#verifies credentials, if valid, prompts you to enter file name 
+#calls the drive_reader file in order to download the file and converts into needed formats
+@app.route('/i', methods=['GET', 'POST'])
+def starter_page():
+    credentials = google.oauth2.credentials.Credentials(
+      **flask.session['credentials'])
+    
+    if request.method == 'POST':
+        val = request.form.get('file_name')
+        callbackFunction(val, credentials)
 
-@app.route('/', methods=['GET', 'POST'])    
-def start():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
-    return redirect(url_for('starter_page'))
+        r_file = pd.read_csv("/tmp/datafile.file")
+        r_file.to_csv("/tmp/datafile.csv", index=None)
 
+        return render_template('drive.html', var= True)
+    return render_template('drive.html', var=False)
 
-
-
+#this is the webpage with the 'CLICK HERE' url
+#basically calls the processing files one at a time
 @app.route('/file_cleaner/')
 def data_cleaning():
     global dc,val
@@ -186,35 +192,41 @@ def data_cleaning():
 
     return redirect(url_for('index'))
 
-
+#shows the index page (the one with the color and images)
 @app.route('/index/')
 def index():
     return render_template('index.html')
 
+#shows the data table
 @app.route('/data/')
 def redirect_response_1():
     return render_template('data.html')
 
+#shows the contacts table
 @app.route('/contact/')
 def redirect_response_2():
     return render_template('contact.html')
 
+#displays the database query editor
 @app.route('/database/')
 def redirect_response_3():
     #nums1, nums2 = [x for x in range(len(names))], [x+100 for x in range(len(names))]
     #colNamesNums = list(map(lambda i,j,k : (i,j,k) , names,nums1, nums2))
     #return render_template('database.html',colNames = colNamesNums)
+    
+    #sets up the access tool
     setup_sql_dict()
     dc =[]
     from db_access_tool import _types, _names_contact, _names_data
 
-    
+    #specifies the rows that can display detailed query editors (the single-double bounds)
     for x in range(len(_types)):
         if _types[x] == 'REAL':
             dc.append(x)
-    
+    #displays webpage
     return render_template('database.html',contact_col = enumerate(_names_contact), data_col = enumerate(_names_data), dtypes_col=dc)
 
+#displays the graph options page
 @app.route('/trends/')
 def redirect_response_4():
     return render_template('trends.html')
@@ -223,15 +235,22 @@ def redirect_response_4():
 #['OR', 'col1_name', 'col_val']
 #['col1_name', 'col_infoval']
 #['col1_name', 'condition', [vals]]
+
+
+#displays the results from the query
 @app.route('/database_result/', methods =["POST"])
 def redirect_response_5():
+    #sets up access tool
     setup_sql_dict()
     from db_access_tool import _types, _raw_data, _raw_contact, _names_contact, _names_data
     dc = []
+      
+    #gets columns that have single or double bounds
     for x in range(len(_types)):
         if _types[x] == 'REAL':
             dc.append(x)
     
+    #gets the desired table name
     if request.form.get('choosetable') == 'data':
         tbl_name = 'data'
     else:
@@ -242,6 +261,10 @@ def redirect_response_5():
 
 #somehow the dummy variables in the for loop become global -  need to fix later, temp fix was changing var names
 
+    #note that both for loops are one-time calls, so data loss is prevented
+    #also note that dynamic queries can be done, meaning the first query doesn't have to be the query on the top in the selector
+
+    #gets a list of all results for contact table parameters (such as name, email, etc)
     for a,b in enumerate(_names_contact):
         if request.form.get('value_contact_'+str(a)) != "":
             marked_vals_contact.append([None, a, request.form.get('value_contact_'+str(a))])
@@ -249,7 +272,8 @@ def redirect_response_5():
                 marked_vals_contact[-1][0] = request.form.get('contact_and_or_'+str(a))
             except:
                 marked_vals_contact[-1][0] = 'FIRSTQUERY'
-
+            
+    #gets a list of all results for data table parameters (such as therm temp)
     for c,d in enumerate(_names_data):
         if request.form.get('value_data_'+str(c)) != "":
             marked_vals_data.append([None, c, request.form.get('value_data_'+str(c))])
@@ -258,7 +282,7 @@ def redirect_response_5():
             except:
                 marked_vals_data[-1][0] = 'FIRSTQUERY'
     
-
+    #identifies and demarcates the complex queries
     for x in dc:
         if request.form.get('double_float_name_'+str(x)) != 'NONE':
             bounding.append([x, request.form.get('double_float_name_'+str(x))])
@@ -266,16 +290,19 @@ def redirect_response_5():
         elif request.form.get('single_float_name_'+str(x)) != 'NONE':
             bounding.append([x, request.form.get('single_float_name_'+str(x))])
             
+    #appends extra parameters to the complex queries in preparation for query generation
     for p in range(len(bounding)):
         for q in range(len(marked_vals_data)):
             if(bounding[p][0] == marked_vals_data[q][1]):
                 marked_vals_data[q].append(bounding[p][1])
 
+    #appends extra parameters to the contact table queries in preparation for query generation
     for p in range(len(marked_vals_contact)):
         marked_vals_contact[p][1] = _raw_contact.get(marked_vals_contact[p][1])
         if(len(marked_vals_contact[p]) == 3):
             marked_vals_contact[p].append('eq')
-
+            
+    #appends extra parameters to the data table queries in preparation for query generation
     for p in range(len(marked_vals_data)):
         marked_vals_data[p][1] = _raw_data.get(marked_vals_data[p][1])
         if(len(marked_vals_data[p]) == 3):
@@ -283,13 +310,16 @@ def redirect_response_5():
     
     contact_sections, data_sections = [], []
 
+    #create query generator object
     q = Query('/tmp/em_volunteer_survey.db')
     
+    #create query sections
     for x in marked_vals_contact:
         contact_sections.append(q.query_generator(x, 'contact'))
     for x in marked_vals_data:
         data_sections.append(q.query_generator(x, 'data'))
 
+    #mapping of first query to the starting on the sequence
     full_set = contact_sections + data_sections
     first_query = None
     
@@ -302,12 +332,16 @@ def redirect_response_5():
     if(first_query is None):
         exit()
     
+    #build query
     result = q.build_query_v2(first_query, full_set, tbl_name)
     
-    
+    #call query
     vals = q.use_query(result)
+      
+    #display query
     return render_template('database_result.html', test=vals, tbl_name = tbl_name, _name_contact=_names_contact, _name_data=_names_data)
 
+#displays graphs based on user choice
 @app.route('/data_graph/<val>')
 def graph_display(val):
     val = int(val)
@@ -320,7 +354,7 @@ def graph_display(val):
     return render_template('gtemplate.html',plot_script=script,plot_div=div,js_resources=INLINE.render_js(),css_resources=INLINE.render_css(),).encode(encoding='UTF-8')
 
 
-    
+#callback function to start the app (port # may change depending on GAE's settings at the time)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='8000', debug=True)
 
